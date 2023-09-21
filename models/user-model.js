@@ -17,6 +17,11 @@ class User {
             .findOne({ email: this.email });
     }
 
+    async existsAlready() {
+        const existingUser = await this.getUserWithSameEmail();
+        return existingUser ? true : false;
+    }
+
     async singup() {
         const hashedPassword = await bcrypt.hash(this.password, 12);
 
