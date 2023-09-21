@@ -1,13 +1,13 @@
 const path = require("path");
 
 const express = require("express");
-const csrf = require("tiny-csrf");
-const cookieParser = require("cookie-parser");
+const csrf = require("csurf");
 
 const createSessionConfig = require("./config/session");
 const expressSession = require("express-session");
 const db = require("./data/database");
 const errorHandler = require("./middlewares/error-handler");
+const checkAuthStatusMiddleware = require("./middlewares/check-authentication-status");
 const addCsrfTokenMiddleware = require("./middlewares/csrf-token");
 const authRouter = require("./routes/auth-routes");
 const productsRouter = require("./routes/products-routes");
@@ -21,14 +21,13 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: false }));
 
-app.use(cookieParser("cookie-parser-secret"));
-
 const sessionConfig = createSessionConfig();
 
 app.use(expressSession(sessionConfig));
-app.use(csrf("123456789iamasecret987654321look"));
+app.use(csrf());
 
 app.use(addCsrfTokenMiddleware);
+app.use(checkAuthStatusMiddleware);
 
 app.use(baseRouter);
 app.use(authRouter);
