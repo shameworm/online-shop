@@ -33,14 +33,20 @@ async function login(req, res) {
     }
 
     const passwordIsCorrect = await user.comparePassword(existingUser.password);
-    
+
     if (!passwordIsCorrect) {
         res.redirect("/login");
         return;
     }
 
-    authUtil.createUserSession(req, existingUser, function() {
+    authUtil.createUserSession(req, existingUser, function () {
         res.redirect("/");
+    });
+}
+
+function logout(req, res) {
+    authUtil.destroyUserAuthSession(req, function () {
+        res.redirect("/login");
     });
 }
 
@@ -49,4 +55,5 @@ module.exports = {
     getLogin: getLogin,
     signup: signup,
     login: login,
+    logout, logout
 };
