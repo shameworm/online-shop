@@ -1,6 +1,6 @@
 const mongodb = require("mongodb");
 const fs = require("fs");
-
+const path = require("path");
 const db = require("../data/database");
 
 class Product {
@@ -84,14 +84,46 @@ class Product {
         this.imageUrl = `/products/assets/images/${this.image}`;
     }
 
-    replaceImage(newImage) {
+    static async deleteUnusedImages() {
+        const imagePath = "../product-data/images";
+        let images;
+
+        try {
+            images = fs.readdirSync(path.join(__dirname, imagePath));
+        } catch (error) {
+            throw new Error("Couldn't read image directory");
+        }
+        console.log(path.join(__dirname, imagePath));
+
+        const products = await db
+            .getDatabase()
+            .collection("products")
+            .find()
+            .toArray();
+        const usedImages = products.map((product) => product.image);
+
+        for (const image of images) {
+            if (!usedImages.includes(image)) {
+                try {
+                    fs.unlinkSync(path.join(__dirname, imagePath, image));
+                } catch (error) {
+                    throw new Error("Couldn't delete image");
+                }
+            }
+        }
+    }
+
+    async replaceImage(newImage) {
         this.image = newImage;
         this.updateImageData();
     }
 
     async remove() {
         const prodId = new mongodb.ObjectId(this.id);
-        await db.getDatabase().collection("products").deleteOne({_id: prodId});
+        await db
+            .getDatabase()
+            .collection("products")
+            .deleteOne({ _id: prodId });
     }
 }
 

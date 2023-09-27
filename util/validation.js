@@ -22,7 +22,17 @@ function passwordIsConfirmed(password, confirmedPassword) {
     return password === confirmedPassword;
 }
 
+function adminProductsIsvalid(title, summary, price, description) {
+    return (
+        !isEmpty(title) &&
+        !isEmpty(summary) && 
+        price > 0 &&
+        !isEmpty(description)
+    );
+}
+
 module.exports = {
     userDetailsAreValid: userDetailsAreValid,
     passwordIsConfirmed: passwordIsConfirmed,
+    adminProductsIsvalid: adminProductsIsvalid
 };

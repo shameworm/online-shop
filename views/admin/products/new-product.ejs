@@ -6,11 +6,12 @@
     <%- include("../../shared/includes/header") %>
     <main>
         <h1>Add New Product</h1>
+        <%- include("../../shared/includes/input-error-message") %>
         <%- include("includes/product-form", {submitPath: "/admin/products", product: {
-            title: "",
-            summary: "",
-            price: "",
-            description: ""
+            title: inputData.title,
+            summary: inputData.summary,
+            price: inputData.price,
+            description: inputData.description,
         }, imageRequired: true}) %>
     </main>
 
