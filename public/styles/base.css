@@ -51,6 +51,10 @@ main {
     margin: 0 auto;
 }
 
+h2 {
+    padding-bottom: var(--space-4);
+}
+
 ul,
 ol {
     list-style: none;
@@ -106,4 +110,12 @@ a {
 
 .alert p {
     margin: var(--space-2) 0;
+}
+
+.badge {
+    margin-left: var(--space-2);
+    padding: 0.15rem var(--space-4);
+    border-radius: 10rem;
+    background-color: var(--color-primary-500);
+    color: var(--color-primary-500-contrast);
 }
