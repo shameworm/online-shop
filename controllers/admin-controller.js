@@ -120,6 +120,7 @@ async function deleteProduct(req, res, next) {
     try {
         product = await Product.findById(req.params.id);
         await product.remove();
+        await Product.deleteUnusedImages();
     } catch (error) {
         next(error);
         return;
