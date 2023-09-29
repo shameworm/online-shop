@@ -13,22 +13,29 @@ for (const formElement of cartItemUpdateFormElements) {
 
         let response;
         try {
-            
-                     response = await fetch("/cart/items", {
-                        method: "PATCH",
-                        body: JSON.stringify({
-                            productId: productId,
-                            quantity: quantity,
-                            _csrf: csrfToken,
-                        }),
-                        headers: {
-                            "content-type": "application/json",
-                        },
-                    });
-            
+            response = await fetch("/cart/items", {
+                method: "PATCH",
+                body: JSON.stringify({
+                    productId: productId,
+                    quantity: quantity,
+                    _csrf: csrfToken,
+                }),
+                headers: {
+                    "content-type": "application/json",
+                },
+            });
         } catch (error) {
             alert("Something went wrong!");
             return;
         }
+
+        if (!response.ok) {
+            alert("Something went wrong!");
+            return;
+        }
+
+        const responseData = await response.json();
+
+        
     });
 }
