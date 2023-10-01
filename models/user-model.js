@@ -1,4 +1,5 @@
 const bcrypt = require("bcryptjs");
+const mongodb = require("mongodb");
 
 const db = require("../data/database");
 
@@ -9,7 +10,16 @@ class User {
         this.fullname = fullname;
         this.address = { street: street, city: city, postal: postal };
     }
-    
+
+    static findById(userId) {
+        const uid = new mongodb.ObjectId(userId);
+
+        return db
+            .getDatabase()
+            .collection("users")
+            .findOne({ _id: uid }, { projection: {password: 0} });
+    }
+
     getUserWithSameEmail() {
         return db
             .getDatabase()
@@ -32,7 +42,6 @@ class User {
             address: this.address,
         });
     }
-
 
     comparePassword(hashedPassword) {
         return bcrypt.compare(this.password, hashedPassword);
