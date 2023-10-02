@@ -22,14 +22,10 @@ class Cart {
       });
 
       if (!product) {
-        // product was deleted!
-        // "schedule" for removal from cart
         deletableCartItemProductIds.push(cartItem.product.id);
         continue;
       }
 
-      // product was not deleted
-      // set product data and total price to latest price from database
       cartItem.product = product;
       cartItem.totalPrice = cartItem.quantity * cartItem.product.price;
     }

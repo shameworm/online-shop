@@ -13,6 +13,7 @@
             </li>
             <% } %>
         </ul>
+        <% if (locals.cart.items.length !== 0) { %>
         <div id="cart-total">
             <p>Total: $<span id="cart-total-price"><%= locals.cart.totalPrice.toFixed(2) %></span></p>
             <% if (locals.isAuth) { %>
@@ -24,6 +25,12 @@
                 <p id="cart-total-fallback">Log in to purchase the items.</p>
             <% } %>
         </div>
+        <% } else { %>
+        <div class="empty-fallback">
+            <h2>Cart is empty</h2>
+            <a href="/" class="btn btn-alt">Look the products</a>
+        </div>
+        <% } %>
     </main>
 
 <%- include("../../shared/includes/footer") %>

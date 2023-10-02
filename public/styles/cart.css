@@ -16,6 +16,12 @@
     font-size: 1.1rem;
 }
 
+.empty-fallback {
+    text-align: center;
+    font-size: 1.5rem;
+}
+
+
 .cart-item input {
     font: inherit;
     padding: var(--space-2);
