@@ -1,117 +1,117 @@
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 html {
-    font-family: "Poppins", "Helvetica Neue", "Helvetica", "Arial", "sans-serif";
+  font-family: "Poppins", "Helvetica Neue", "Helvetica", "Arial", "sans-serif";
 
-    --color-gray-50: rgb(240, 240, 240);
-    --color-gray-100: rgb(221, 221, 221);
-    --color-gray-300: rgb(153, 153, 153);
-    --color-gray-400: rgb(102, 102, 102);
-    --color-gray-500: rgb(51, 51, 51);
-    --color-gray-600: rgb(45, 45, 45);
-    --color-gray-700: rgb(26, 26, 26);
-    --color-primary-50: rgb(255, 230, 204);
-    --color-primary-100: rgb(255, 187, 153);
-    --color-primary-200: rgb(255, 99, 51);
-    --color-primary-400: rgb(255, 88, 51);
-    --color-primary-500: rgb(255, 51, 0);
-    --color-primary-700: rgb(204, 51, 0);
-    --color-primary-200-contrast: rgb(77, 38, 0);
-    --color-primary-500-contrast: white;
-    --color-error-100: rgb(255, 204, 204);
-    --color-error-500: rgb(204, 0, 0);
-    --color-primary-500-bg: rgb(102, 102, 102);
+  --color-gray-50: rgb(240, 240, 240);
+  --color-gray-100: rgb(221, 221, 221);
+  --color-gray-300: rgb(153, 153, 153);
+  --color-gray-400: rgb(102, 102, 102);
+  --color-gray-500: rgb(51, 51, 51);
+  --color-gray-600: rgb(45, 45, 45);
+  --color-gray-700: rgb(26, 26, 26);
+  --color-primary-50: rgb(255, 230, 204);
+  --color-primary-100: rgb(255, 187, 153);
+  --color-primary-200: rgb(255, 99, 51);
+  --color-primary-400: rgb(255, 88, 51);
+  --color-primary-500: rgb(255, 51, 0);
+  --color-primary-700: rgb(204, 51, 0);
+  --color-primary-200-contrast: rgb(77, 38, 0);
+  --color-primary-500-contrast: white;
+  --color-error-100: rgb(255, 204, 204);
+  --color-error-500: rgb(204, 0, 0);
+  --color-primary-500-bg: rgb(102, 102, 102);
 
-    --space-1: 0.25rem;
-    --space-2: 0.5rem;
-    --space-4: 1rem;
-    --space-6: 1.5rem;
-    --space-8: 2rem;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
 
-    --border-radius-small: 4px;
-    --border-radius-medium: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
 
-    --shadow-medium: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-medium: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 body {
-    background-color: var(--color-gray-500);
-    color: var(--color-gray-100);
-    margin: 0;
+  background-color: var(--color-gray-500);
+  color: var(--color-gray-100);
+  margin: 0;
 }
 
 main {
-    width: 90%;
-    max-width: 50rem;
-    margin: 0 auto;
+  width: 90%;
+  max-width: 50rem;
+  margin: 0 auto;
 }
 
 h2 {
-    padding-bottom: var(--space-4);
+  padding-bottom: var(--space-4);
 }
 
 ul,
 ol {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 a {
-    text-decoration: none;
-    color: var(--color-primary-400);
+  text-decoration: none;
+  color: var(--color-primary-400);
 }
 
 .btn {
-    cursor: pointer;
-    font: inherit;
-    padding: var(--space-2) var(--space-4);
-    background-color: var(--color-primary-500);
-    color: var(--color-primary-500-contrast);
-    border: 1px solid var(--color-primary-500);
-    border-radius: var(--border-radius-small);
+  cursor: pointer;
+  font: inherit;
+  padding: var(--space-2) var(--space-4);
+  background-color: var(--color-primary-500);
+  color: var(--color-primary-500-contrast);
+  border: 1px solid var(--color-primary-500);
+  border-radius: var(--border-radius-small);
 }
 
 .btn:hover,
 .btn:active {
-    background-color: var(--color-primary-700);
-    border-color: var(--color-primary-700);
+  background-color: var(--color-primary-700);
+  border-color: var(--color-primary-700);
 }
 
 .btn-alt {
-    background-color: transparent;
-    color: var(--color-primary-500);
+  background-color: transparent;
+  color: var(--color-primary-500);
 }
 
 .btn-alt:hover,
 .btn-alt:active {
-    background-color: var(--color-primary-500-bg);
+  background-color: var(--color-primary-500-bg);
 }
 
 .alert {
-    border-radius: var(--border-radius-medium);
-    background-color: var(--color-error-100);
-    color: var(--color-error-500);
-    padding: var(--space-4);
-    text-align: center;
+  border-radius: var(--border-radius-medium);
+  background-color: var(--color-error-100);
+  color: var(--color-error-500);
+  padding: var(--space-4);
+  text-align: center;
 }
 
 .alert h2 {
-    font-size: 1rem;
-    margin: var(--space-2) 0;
-    text-transform: uppercase;
+  font-size: 1rem;
+  margin: var(--space-2) 0;
+  text-transform: uppercase;
 }
 
 .alert p {
-    margin: var(--space-2) 0;
+  margin: var(--space-2) 0;
 }
 
 .badge {
-    margin-left: var(--space-2);
-    padding: 0.15rem var(--space-4);
-    border-radius: 10rem;
-    background-color: var(--color-primary-500);
-    color: var(--color-primary-500-contrast);
+  margin-left: var(--space-2);
+  padding: 0.15rem var(--space-4);
+  border-radius: 10rem;
+  background-color: var(--color-primary-500);
+  color: var(--color-primary-500-contrast);
 }

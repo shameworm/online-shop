@@ -8,5 +8,4 @@ router.get("/", ordersCountroller.getOrders);
 
 router.post("/", ordersCountroller.addOrder);
 
-
 module.exports = router;

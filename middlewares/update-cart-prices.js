@@ -1,8 +1,8 @@
 async function updateCartPrices(req, res, next) {
-    const cart = res.locals.cart;
-    await cart.updatePrices();
+  const cart = res.locals.cart;
+  await cart.updatePrices();
 
-    next();
+  next();
 }
 
 module.exports = updateCartPrices;

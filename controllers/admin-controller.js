@@ -4,172 +4,170 @@ const validation = require("../util/validation");
 const sessionFlash = require("../util/session-flashing");
 
 async function getProducts(req, res, next) {
-    try {
-        const products = await Product.findAll();
-        res.render("admin/products/all-products", { products: products });
-    } catch (err) {
-        next(err);
-        return;
-    }
+  try {
+    const products = await Product.findAll();
+    res.status(200).json({ products: products });
+  } catch (err) {
+    next(err);
+    return;
+  }
 }
 
 function getNewProduct(req, res) {
-    let sessionData = sessionFlash.getSessionData(req);
+  let sessionData = sessionFlash.getSessionData(req);
 
-    if (!sessionData) {
-        sessionData = {
-            title: "",
-            summary: "",
-            price: "",
-            description: "",
-        };
-    }
+  if (!sessionData) {
+    sessionData = {
+      title: "",
+      summary: "",
+      price: "",
+      description: "",
+    };
+  }
 
-    res.render("admin/products/new-product", { inputData: sessionData });
+  res.status(200).json({ inputData: sessionData });
 }
 
 async function createNewProduct(req, res, next) {
-    const enteredData = {
-        title: req.body.title,
-        summary: req.body.summary,
-        price: req.body.price,
-        description: req.body.description,
-    };
+  const enteredData = {
+    title: req.body.title,
+    summary: req.body.summary,
+    price: req.body.price,
+    description: req.body.description,
+  };
 
-    if (!req.file || !req.file.filename) {
-        sessionFlash.flashDataToSession(
-            req,
-            {
-                message: "Please upload an image",
-                ...enteredData,
-            },
-            () => res.redirect("/admin/products/new")
-        );
-        return;
-    }
+  if (!req.file || !req.file.filename) {
+    sessionFlash.flashDataToSession(
+      req,
+      {
+        message: "Please upload an image",
+        ...enteredData,
+      },
+      () => res.redirect("/admin/products/new")
+    );
+    return;
+  }
 
-    if (
-        !validation.adminProductsIsvalid(
-            enteredData.title,
-            enteredData.summary,
-            enteredData.price,
-            enteredData.description
-        )
-    ) {
-        sessionFlash.flashDataToSession(
-            req,
-            {
-                message:
-                    "Please fill out all fields (reminder price must be greater than 0)",
-                ...enteredData,
-            },
-            () => res.redirect("/admin/products/new")
-        );
-        return;
-    }
+  if (
+    !validation.adminProductsIsvalid(
+      enteredData.title,
+      enteredData.summary,
+      enteredData.price,
+      enteredData.description
+    )
+  ) {
+    sessionFlash.flashDataToSession(
+      req,
+      {
+        message:
+          "Please fill out all fields (reminder price must be greater than 0)",
+        ...enteredData,
+      },
+      () => res.redirect("/admin/products/new")
+    );
+    return;
+  }
 
-    const product = new Product({
-        ...req.body,
-        image: req.file.filename,
-    });
+  const product = new Product({
+    ...req.body,
+    image: req.file.filename,
+  });
 
-    try {
-        await product.save();
-    } catch (err) {
-        next(err);
-        return;
-    }
+  try {
+    await product.save();
+  } catch (err) {
+    next(err);
+    return;
+  }
 
-    res.redirect("/admin/products");
+  res.redirect("/admin/products");
 }
 
 async function getUpdateProduct(req, res, next) {
-    try {
-        const product = await Product.findById(req.params.id);
-        res.render("admin/products/update-product", {
-            product: product,
-        });
-    } catch (error) {
-        next(error);
-        return;
-    }
+  try {
+    const product = await Product.findById(req.params.id);
+    res.status(200).json({ product });
+  } catch (error) {
+    next(error);
+    return;
+  }
 }
 
 async function updateProduct(req, res, next) {
-    const product = new Product({
-        ...req.body,
-        _id: req.params.id,
-    });
+  const product = new Product({
+    ...req.body,
+    _id: req.params.id,
+  });
 
-    if (req.file) {
-        product.replaceImage(req.file.filename);
-    }
+  if (req.file) {
+    product.replaceImage(req.file.filename);
+  }
 
-    try {
-        await product.save();
-    } catch (err) {
-        next(err);
-        return;
-    }
+  try {
+    await product.save();
+  } catch (err) {
+    next(err);
+    return;
+  }
 
-    await Product.deleteUnusedImages();
-    res.redirect("/admin/products");
+  await Product.deleteUnusedImages();
+  res.redirect("/admin/products");
 }
 
 async function deleteProduct(req, res, next) {
-    let product;
-    try {
-        product = await Product.findById(req.params.id);
-        await product.remove();
-        await Product.deleteUnusedImages();
-    } catch (error) {
-        next(error);
-        return;
-    }
+  let product;
+  try {
+    product = await Product.findById(req.params.id);
+    await product.remove();
+    await Product.deleteUnusedImages();
+  } catch (error) {
+    next(error);
+    return;
+  }
 
-    res.json({
-        message: "Deleted product",
-    });
+  res.status(204).json({
+    message: "Deleted product",
+  });
 }
 
 async function getOrders(req, res, next) {
-    try {
-        const orders = await Order.findAll();
-        res.render("admin/orders/admin-orders", {
-            orders: orders,
-        });
-    } catch (error) {
-        next(error);
-    }
+  try {
+    const orders = await Order.findAll();
+    res.status(200).json({
+      orders: orders,
+    });
+  } catch (error) {
+    next(error);
+  }
 }
 
 async function updateOrder(req, res, next) {
-    const orderId = req.params.id;
-    const newStatus = req.body.newStatus;
-    
-    try {
-        const order = await Order.findById(orderId);
+  const orderId = req.params.id;
+  const newStatus = req.body.newStatus;
 
-        order.status = newStatus;
+  try {
+    const order = await Order.findById(orderId);
 
-        await order.save();
+    order.status = newStatus;
 
-        res.json({
-            message: "Order updated successfully",
-            newStatus: newStatus,
-        });
-    } catch (error) {
-        next(error);
-    }
+    await order.save();
+
+    res.status(204).json({
+      message: "Order updated successfully",
+      newStatus: newStatus,
+    });
+  } catch (error) {
+    next(error);
+  }
 }
 
 module.exports = {
-    getProducts: getProducts,
-    getNewProduct: getNewProduct,
-    createNewProduct: createNewProduct,
-    getUpdateProduct: getUpdateProduct,
-    updateProduct: updateProduct,
-    deleteProduct: deleteProduct,
-    getOrders: getOrders,
-    updateOrder: updateOrder,
+  getProducts: getProducts,
+  getNewProduct: getNewProduct,
+  createNewProduct: createNewProduct,
+  getUpdateProduct: getUpdateProduct,
+  updateProduct: updateProduct,
+  deleteProduct: deleteProduct,
+  getOrders: getOrders,
+  updateOrder: updateOrder,
 };
