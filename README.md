@@ -21,7 +21,7 @@ npm install
 4. Run this to start the development server.
 
 ```bash
-npm start 
+npm run dev
 ```
 
 ## Backend
