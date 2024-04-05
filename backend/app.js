@@ -1,13 +1,10 @@
-const path = require("path");
 
 const express = require("express");
-const csrf = require("csurf");
 const expressSession = require("express-session");
 
 const createSessionConfig = require("./config/session");
 const db = require("./data/database");
 
-const addCsrfTokenMiddleware = require("./middlewares/csrf-token");
 const errorHandlerMiddleware = require("./middlewares/error-handler");
 const checkAuthStatusMiddleware = require("./middlewares/check-authentication-status");
 const routesProtectMiddleware = require("./middlewares/protect-routes");
@@ -32,12 +29,10 @@ app.use(express.json());
 const sessionConfig = createSessionConfig();
 
 app.use(expressSession(sessionConfig));
-app.use(csrf());
 
 app.use(cartMiddleware);
 app.use(updateCartPricesMiddleware);
 
-app.use(addCsrfTokenMiddleware);
 app.use(checkAuthStatusMiddleware);
 
 app.use(baseRouter);
