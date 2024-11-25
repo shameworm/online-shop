@@ -35,8 +35,8 @@ class TelegramBotService {
                     await TelegramController.sendAllOrders(this.bot, chatId, messageId, currentIndex + 1);
                 } else if (data === "/navigate_exit") {
                     await TelegramController.sendAdminMenu(this.bot, chatId);
-                } else if (data.startsWith("/update_status")) {
-                    const [, , orderId, newStatus] = data.split("_");
+                } else if (data.startsWith("/update")) {
+                    const [, orderId, newStatus] = data.split("_");
                     console.log(data);
                     console.log(orderId, newStatus)
                     await TelegramController.changeOrderStatus(this.bot, chatId, orderId, newStatus);

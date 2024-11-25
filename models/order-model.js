@@ -73,7 +73,7 @@ class Order {
         return db
             .getDatabase()
             .collection("orders")
-            .find({ status }).toArray();
+            .find({ status }).sort({ _id: -1 }).toArray();
     }
 
     save() {

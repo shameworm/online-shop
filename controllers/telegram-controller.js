@@ -32,11 +32,22 @@ const sendProcessingOrders = async (bot, chatId, messageId, currentIndex = 0) =>
 
     const order = processingOrders[currentIndex];
     const message = OrderMessage.getOrderMessage(order);
+    console.log(order)
 
     const inlineKeyboard = {
       inline_keyboard: [
         [{ text: "Go back", callback_data: `/navigate_exit` }],
-        [{ text: "Update Status", callback_data: `/update_${order._id}` }],
+        [
+          { text: "Processing", callback_data: `/update_${order._id}_processing` },
+          { text: "Packed", callback_data: `/update_${order._id}_packed` },
+          { text: "Shipped to Courier", callback_data: `/update_${order._id}_shipped_to_courier` },
+        ],
+        [
+          { text: "In Transit", callback_data: `/update_${order._id}_in_transit` },
+          { text: "Arrived", callback_data: `/update_${order._id}_arrived` },
+          { text: "Completed", callback_data: `/update_${order._id}_completed` },
+        ],
+        [{ text: "Rejected", callback_data: `/update_${order._id}_rejected` }],
         [{ text: "Add TTN", callback_data: `/add_ttn_${order._id}` }],
         [
           {
@@ -81,11 +92,22 @@ const sendAllOrders = async (bot, chatId, messageId, currentIndex = 0) => {
 
     const order = orders[currentIndex];
     const message = OrderMessage.getOrderMessage(order);
+    console.log(order)
 
     const inlineKeyboard = {
       inline_keyboard: [
         [{ text: "Go back", callback_data: `/navigate_exit` }],
-        [{ text: "Update Status", callback_data: `/update_${order._id}` }],
+        [
+          { text: "Processing", callback_data: `/update_${order.id}_processing` },
+          { text: "Packed", callback_data: `/update_${order.id}_packed` },
+          { text: "Shipped to Courier", callback_data: `/update_${order.id}_shipped_to_courier` },
+        ],
+        [
+          { text: "In Transit", callback_data: `/update_${order.id}_in_transit` },
+          { text: "Arrived", callback_data: `/update_${order.id}_arrived` },
+          { text: "Completed", callback_data: `/update_${order.id}_completed` },
+        ],
+        [{ text: "Rejected", callback_data: `/update_${order.id}_rejected` }],
         [
           {
             text: "⬅️",
@@ -179,11 +201,14 @@ const changeOrderStatus = async (bot, chatId, orderId, newStatus) => {
     await order.save();
 
     await bot.sendMessage(chatId, `Order #${orderId} status updated to ${newStatus}.`);
+
   } catch (error) {
     console.error("Error updating order status:", error);
     await bot.sendMessage(chatId, `Failed to update order #${orderId} status.`);
   }
 };
+
+
 
 
 const handleAddTrackingNumber = async (bot, msg, chatId, orderId) => {
