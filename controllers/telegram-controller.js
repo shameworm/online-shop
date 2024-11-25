@@ -31,7 +31,6 @@ const sendProcessingOrders = async (bot, chatId, messageId, currentIndex = 0) =>
     }
 
     const order = processingOrders[currentIndex];
-    console.log(order)
     const message = OrderMessage.getOrderMessage(order);
 
     const inlineKeyboard = {
@@ -167,7 +166,7 @@ const handleUserRegistration = async (bot, msg, chatId) => {
   });
 };
 
-const updateOrderStatus = async (bot, chatId, orderId) => {
+const changeOrderStatus = async (bot, chatId, orderId, newStatus) => {
   try {
     const order = await Order.findById(orderId);
 
@@ -176,42 +175,13 @@ const updateOrderStatus = async (bot, chatId, orderId) => {
       return;
     }
 
-    const inlineKeyboard = {
-      inline_keyboard: [
-        [{ text: "Processing", callback_data: `/update_status_${orderId}_processing` }],
-        [{ text: "Packed", callback_data: `/update_status_${orderId}_packed` }],
-        [{ text: "Shipped to Courier", callback_data: `/update_status_${orderId}_shipped_to_courier` }],
-        [{ text: "In Transit", callback_data: `/update_status_${orderId}_in_transit` }],
-        [{ text: "Arrived", callback_data: `/update_status_${orderId}_arrived` }],
-        [{ text: "Completed", callback_data: `/update_status_${orderId}_completed` }],
-        [{ text: "Rejected", callback_data: `/update_status_${orderId}_rejected` }],
-      ],
-    };
+    order.status = newStatus;
+    await order.save();
 
-    await bot.sendMessage(chatId, `Choose the new status for Order #${orderId}:`, {
-      reply_markup: inlineKeyboard,
-    });
+    await bot.sendMessage(chatId, `Order #${orderId} status updated to ${newStatus}.`);
   } catch (error) {
     console.error("Error updating order status:", error);
-    await bot.sendMessage(chatId, "Failed to fetch order details.");
-  }
-};
-
-const handleStatusUpdate = async (bot, chatId, data) => {
-  const [_, orderId, status] = data.split("_");
-
-  try {
-    const order = await Order.findById(orderId);
-    if (order) {
-      order.status = status;
-      await order.save();
-      await bot.sendMessage(chatId, `Order #${orderId} status updated to ${status}.`);
-    } else {
-      await bot.sendMessage(chatId, `Order #${orderId} not found.`);
-    }
-  } catch (error) {
-    console.error("Error updating status:", error);
-    await bot.sendMessage(chatId, "Error updating order status.");
+    await bot.sendMessage(chatId, `Failed to update order #${orderId} status.`);
   }
 };
 
@@ -222,7 +192,6 @@ const handleAddTrackingNumber = async (bot, msg, chatId, orderId) => {
   bot.once("message", async (msgWithTtn) => {
     const ttn = msgWithTtn.text;
 
-    console.log(orderId)
 
     if (!ttn) {
       await bot.sendMessage(chatId, "Invalid tracking number. Please try again.");
@@ -236,7 +205,6 @@ const handleAddTrackingNumber = async (bot, msg, chatId, orderId) => {
         return;
       }
 
-      console.log(ttn)
       order.ttn = ttn;
       order.status = "shipping"
       await order.save();
@@ -256,7 +224,6 @@ module.exports = {
   sendProcessingOrders,
   sendAllOrders,
   handleUserRegistration,
-  updateOrderStatus,
-  handleStatusUpdate,
+  changeOrderStatus,
   handleAddTrackingNumber,
 };

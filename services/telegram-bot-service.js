@@ -21,9 +21,11 @@ class TelegramBotService {
                     await TelegramController.sendAllOrders(this.bot, chatId);
                 } else if (data.startsWith("/navigate_prev")) {
                     const currentIndex = parseInt(data.split("_")[2], 10);
+                    console.log(currentIndex)
                     await TelegramController.sendProcessingOrders(this.bot, chatId, messageId, currentIndex - 1);
                 } else if (data.startsWith("/navigate_next")) {
                     const currentIndex = parseInt(data.split("_")[2], 10);
+                    console.log(currentIndex)
                     await TelegramController.sendProcessingOrders(this.bot, chatId, messageId, currentIndex + 1);
                 } else if (data.startsWith("/navigate_all_prev")) {
                     const currentIndex = parseInt(data.split("_")[3], 10);
@@ -33,8 +35,11 @@ class TelegramBotService {
                     await TelegramController.sendAllOrders(this.bot, chatId, messageId, currentIndex + 1);
                 } else if (data === "/navigate_exit") {
                     await TelegramController.sendAdminMenu(this.bot, chatId);
-                } else if (data.startsWith("/update_")) {
-                    await TelegramController.handleStatusUpdate(this.bot, chatId, data);
+                } else if (data.startsWith("/update_status")) {
+                    const [, , orderId, newStatus] = data.split("_");
+                    console.log(data);
+                    console.log(orderId, newStatus)
+                    await TelegramController.changeOrderStatus(this.bot, chatId, orderId, newStatus);
                 } else if (data.startsWith("/add_ttn_")) {
                     const orderId = data.split("_")[2];
                     await TelegramController.handleAddTrackingNumber(this.bot, query.message, chatId, orderId);
