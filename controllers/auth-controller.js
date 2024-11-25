@@ -15,6 +15,7 @@ function getSingup(req, res) {
             street: "",
             postal: "",
             city: "",
+            phoneNumber: "",
         };
     }
 
@@ -30,6 +31,7 @@ async function signup(req, res, next) {
         street: req.body.street,
         postal: req.body.postal,
         city: req.body.city,
+        phoneNumber: req.body.phoneNumber,
     };
 
     if (
@@ -40,7 +42,8 @@ async function signup(req, res, next) {
             req.body.fullname,
             req.body.street,
             req.body.postal,
-            req.body.city
+            req.body.city,
+            req.body.phoneNumber,
         ) ||
         !validation.passwordIsConfirmed(
             req.body.password,
@@ -66,7 +69,8 @@ async function signup(req, res, next) {
         req.body.fullname,
         req.body.street,
         req.body.postal,
-        req.body.city
+        req.body.city,
+        req.body.phoneNumber,
     );
 
     try {

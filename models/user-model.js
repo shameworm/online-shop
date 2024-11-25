@@ -4,11 +4,13 @@ const mongodb = require("mongodb");
 const db = require("../data/database");
 
 class User {
-    constructor(email, password, fullname, street, postal, city) {
+    constructor(email, password, fullname, street, postal, city, phoneNumber, telegramId) {
         this.email = email;
         this.password = password;
         this.fullname = fullname;
         this.address = { street: street, city: city, postal: postal };
+        this.phoneNumber = phoneNumber;
+        this.telegramId = this.telegramId || undefined;
     }
 
     static findById(userId) {
@@ -17,7 +19,18 @@ class User {
         return db
             .getDatabase()
             .collection("users")
-            .findOne({ _id: uid }, { projection: {password: 0} });
+            .findOne({ _id: uid }, { projection: { password: 0 } });
+    }
+
+    static setChatIdByPhoneNumber(phoneNumber, chatId) {
+        return db
+            .getDatabase()
+            .collection("users")
+            .findOneAndUpdate(
+                { phoneNumber },
+                { $set: { telegramId: chatId } },
+                { returnDocument: "after" }
+            );
     }
 
     getUserWithSameEmail() {
@@ -40,6 +53,7 @@ class User {
             password: hashedPassword,
             fullname: this.fullname,
             address: this.address,
+            phoneNumber: this.phoneNumber,
         });
     }
 

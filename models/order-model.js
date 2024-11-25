@@ -4,7 +4,7 @@ const db = require("../data/database");
 
 class Order {
     // Status => pending, fulfilled, cancelled
-    constructor(cart, userData, status = "pending", date, orderId) {
+    constructor(cart, userData, status = "processing", date, orderId, ttn) {
         this.productData = cart;
         this.userData = userData;
         this.status = status;
@@ -18,6 +18,7 @@ class Order {
             });
         }
         this.id = orderId;
+        this.ttn = ttn;
     }
 
     static transformOrderDocument(orderDoc) {
@@ -26,7 +27,8 @@ class Order {
             orderDoc.userData,
             orderDoc.status,
             orderDoc.date,
-            orderDoc._id
+            orderDoc._id,
+            orderDoc.ttn
         );
     }
 
@@ -65,6 +67,13 @@ class Order {
             .findOne({ _id: new mongodb.ObjectId(orderId) });
 
         return this.transformOrderDocument(order);
+    }
+
+    static async findByStatus(status) {
+        return db
+            .getDatabase()
+            .collection("orders")
+            .find({ status }).toArray();
     }
 
     save() {

@@ -7,6 +7,9 @@ const expressSession = require("express-session");
 const createSessionConfig = require("./config/session");
 const db = require("./data/database");
 
+
+const TelegramBotService = require('./services/telegram-bot-service');
+
 const addCsrfTokenMiddleware = require("./middlewares/csrf-token");
 const errorHandlerMiddleware = require("./middlewares/error-handler");
 const checkAuthStatusMiddleware = require("./middlewares/check-authentication-status");
@@ -57,6 +60,11 @@ app.use(errorHandlerMiddleware);
 db.connectToDatabase()
     .then(() => {
         app.listen(3000);
+        const telegramBot = new TelegramBotService();
+        global.telegramBot = telegramBot;
+
+
+        console.log('Server and Telegram bot are running!');
     })
     .catch((error) => {
         console.log("Failed to connect to database");

@@ -7,7 +7,9 @@
   <section class="order-details">
     <% if (locals.isAdmin) { %>
       <address>
-        <p><a href="mailto:<%= order.userData.email %>"><%= order.userData.fullname %></a></p>
+        <p><a href="mailto:<%= order.userData.email %>"><%= order.userData.fullname %></a>   
+          <span><%= order.userData.phoneNumber %></span>
+        </p>
         <p><%= order.userData.address.street %> (<%= order.userData.address.postal %> <%= order.userData.address.city %>)</p>
       </address>
     <% } %>
@@ -24,9 +26,13 @@
         <input type="hidden" name="_csrf" value="<%= locals.csrfToken %>">
         <input type="hidden" name="orderid" value="<%= order.id %>">
         <select name="status">
-          <option value="pending" <% if (order.status === 'pending') { %>selected<% } %>>Pending</option>
-          <option value="fulfilled" <% if (order.status === 'fulfilled') { %>selected<% } %>>Fulfilled</option>
-          <option value="cancelled" <% if (order.status === 'cancelled') { %>selected<% } %>>Cancelled</option>
+          <option value="processing" <% if (order.status === 'processing') { %>selected<% } %>>Processing</option>
+          <option value="packed" <% if (order.status === 'packed') { %>selected<% } %>>Packed</option>
+          <option value="shipped-to-courier" <% if (order.status === 'shipped-to-courier') { %>selected<% } %>>Shipped to Courier</option>
+          <option value="in-transit" <% if (order.status === 'in-transit') { %>selected<% } %>>In Transit</option>
+          <option value="arrived" <% if (order.status === 'arrived') { %>selected<% } %>>Arrived</option>
+          <option value="completed" <% if (order.status === 'completed') { %>selected<% } %>>Completed</option>
+          <option value="rejected" <% if (order.status === 'rejected') { %>selected<% } %>>Rejected</option>
         </select>
         <button class="btn btn-alt">Update</button>
       </form>

@@ -8,13 +8,15 @@ function userCredentialsAreValid(email, password) {
     );
 }
 
-function userDetailsAreValid(email, password, fullname, street, city, postal) {
+function userDetailsAreValid(email, password, fullname, street, city, postal, phoneNumber) {
     return (
         userCredentialsAreValid(email, password) &&
         !isEmpty(fullname) &&
         !isEmpty(street) &&
         !isEmpty(city) &&
-        !isEmpty(postal)
+        !isEmpty(postal) &&
+        !isEmpty(phoneNumber)
+
     );
 }
 

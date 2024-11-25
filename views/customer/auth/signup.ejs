@@ -53,6 +53,13 @@
                 value="<%= inputData.city %>" required>
             </p>
 
+            <p>
+                <label for="phone">Phone number</label>
+                <input type="tel" id="phoneNumber" name="phoneNumber" 
+                       pattern="^\+380\d{9}$" value="<%= inputData.phoneNumber %>" maxlength="13" required>
+            </p>
+            
+
             <button class="btn">Create Account</button>
             <p id="switch-form"><a href="/login">Login instead</a></p>
         </form>
