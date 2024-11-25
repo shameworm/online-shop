@@ -31,13 +31,14 @@ const sendProcessingOrders = async (bot, chatId, messageId, currentIndex = 0) =>
     }
 
     const order = processingOrders[currentIndex];
+    console.log(order)
     const message = OrderMessage.getOrderMessage(order);
 
     const inlineKeyboard = {
       inline_keyboard: [
         [{ text: "Go back", callback_data: `/navigate_exit` }],
-        [{ text: "Update Status", callback_data: `/update_${order.id}` }],
-        [{ text: "Add TTN", callback_data: `/add_ttn_${order.id}` }],
+        [{ text: "Update Status", callback_data: `/update_${order._id}` }],
+        [{ text: "Add TTN", callback_data: `/add_ttn_${order._id}` }],
         [
           {
             text: "⬅️",
@@ -85,8 +86,7 @@ const sendAllOrders = async (bot, chatId, messageId, currentIndex = 0) => {
     const inlineKeyboard = {
       inline_keyboard: [
         [{ text: "Go back", callback_data: `/navigate_exit` }],
-        [{ text: "Update Status", callback_data: `/update_${order.id}` }],
-        [{ text: "Add TTN", callback_data: `/add_ttn_${order.id}` }],
+        [{ text: "Update Status", callback_data: `/update_${order._id}` }],
         [
           {
             text: "⬅️",
@@ -170,14 +170,85 @@ const handleUserRegistration = async (bot, msg, chatId) => {
 const updateOrderStatus = async (bot, chatId, orderId) => {
   try {
     const order = await Order.findById(orderId);
-    order.status = "updated";
-    await order.save();
-    await bot.sendMessage(chatId, `Order #${orderId} status updated successfully.`);
+
+    if (!order) {
+      await bot.sendMessage(chatId, `Order #${orderId} not found.`);
+      return;
+    }
+
+    const inlineKeyboard = {
+      inline_keyboard: [
+        [{ text: "Processing", callback_data: `/update_status_${orderId}_processing` }],
+        [{ text: "Packed", callback_data: `/update_status_${orderId}_packed` }],
+        [{ text: "Shipped to Courier", callback_data: `/update_status_${orderId}_shipped_to_courier` }],
+        [{ text: "In Transit", callback_data: `/update_status_${orderId}_in_transit` }],
+        [{ text: "Arrived", callback_data: `/update_status_${orderId}_arrived` }],
+        [{ text: "Completed", callback_data: `/update_status_${orderId}_completed` }],
+        [{ text: "Rejected", callback_data: `/update_status_${orderId}_rejected` }],
+      ],
+    };
+
+    await bot.sendMessage(chatId, `Choose the new status for Order #${orderId}:`, {
+      reply_markup: inlineKeyboard,
+    });
   } catch (error) {
     console.error("Error updating order status:", error);
-    await bot.sendMessage(chatId, "Failed to update order status.");
+    await bot.sendMessage(chatId, "Failed to fetch order details.");
   }
 };
+
+const handleStatusUpdate = async (bot, chatId, data) => {
+  const [_, orderId, status] = data.split("_");
+
+  try {
+    const order = await Order.findById(orderId);
+    if (order) {
+      order.status = status;
+      await order.save();
+      await bot.sendMessage(chatId, `Order #${orderId} status updated to ${status}.`);
+    } else {
+      await bot.sendMessage(chatId, `Order #${orderId} not found.`);
+    }
+  } catch (error) {
+    console.error("Error updating status:", error);
+    await bot.sendMessage(chatId, "Error updating order status.");
+  }
+};
+
+
+const handleAddTrackingNumber = async (bot, msg, chatId, orderId) => {
+  await bot.sendMessage(chatId, `Please enter the tracking number for Order #${orderId}:`);
+
+  bot.once("message", async (msgWithTtn) => {
+    const ttn = msgWithTtn.text;
+
+    console.log(orderId)
+
+    if (!ttn) {
+      await bot.sendMessage(chatId, "Invalid tracking number. Please try again.");
+      return;
+    }
+
+    try {
+      const order = await Order.findById(orderId);
+      if (!order) {
+        await bot.sendMessage(chatId, `Order #${orderId} not found.`);
+        return;
+      }
+
+      console.log(ttn)
+      order.ttn = ttn;
+      order.status = "shipping"
+      await order.save();
+
+      await bot.sendMessage(chatId, `Tracking number for Order #${orderId} has been added: ${ttn}`);
+    } catch (error) {
+      console.error("Error adding tracking number:", error);
+      await bot.sendMessage(chatId, "Error adding tracking number.");
+    }
+  });
+};
+
 
 module.exports = {
   sendAdminMenu,
@@ -186,4 +257,6 @@ module.exports = {
   sendAllOrders,
   handleUserRegistration,
   updateOrderStatus,
+  handleStatusUpdate,
+  handleAddTrackingNumber,
 };

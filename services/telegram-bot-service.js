@@ -34,11 +34,10 @@ class TelegramBotService {
                 } else if (data === "/navigate_exit") {
                     await TelegramController.sendAdminMenu(this.bot, chatId);
                 } else if (data.startsWith("/update_")) {
-                    const orderId = data.split("_")[1];
-                    await TelegramController.updateOrderStatus(this.bot, chatId, orderId);
+                    await TelegramController.handleStatusUpdate(this.bot, chatId, data);
                 } else if (data.startsWith("/add_ttn_")) {
                     const orderId = data.split("_")[2];
-                    await TelegramController.addTrackingNumber(this.bot, chatId, orderId);
+                    await TelegramController.handleAddTrackingNumber(this.bot, query.message, chatId, orderId);
                 }
                 await this.bot.answerCallbackQuery(query.id);
             } catch (error) {

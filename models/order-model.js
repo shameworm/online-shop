@@ -4,7 +4,7 @@ const db = require("../data/database");
 
 class Order {
     // Status => pending, fulfilled, cancelled
-    constructor(cart, userData, status = "processing", date, orderId, ttn) {
+    constructor(cart, userData, status = "processing", date, orderId, ttn = "") {
         this.productData = cart;
         this.userData = userData;
         this.status = status;
@@ -82,13 +82,14 @@ class Order {
             return db
                 .getDatabase()
                 .collection("orders")
-                .updateOne({ _id: orderId }, { $set: { status: this.status } });
+                .updateOne({ _id: orderId }, { $set: { status: this.status, ttn: this.ttn } });
         } else {
             const orderDocument = {
                 userData: this.userData,
                 productData: this.productData,
                 date: new Date(),
                 status: this.status,
+                ttn: this.ttn
             };
 
             return db.getDatabase().collection("orders").insertOne(orderDocument);

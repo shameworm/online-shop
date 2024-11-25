@@ -24,7 +24,7 @@ function getOrderMessage(order) {
    - Street: ${order.userData.address.street}
    - City: ${order.userData.address.city}
    - Postal Code: ${order.userData.address.postal}
-
+   ${order.ttn ? `- TTN: ${order.ttn}` : ""}
 📦 Order Status: ${order.status}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
