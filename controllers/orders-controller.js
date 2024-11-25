@@ -1,6 +1,10 @@
 const Order = require("../models/order-model");
 const User = require("../models/user-model");
 
+const { adminChatId } = require("../config/telegram");
+const { notifyAdminAboutNewOrder } = require("../controllers/telegram-controller")
+
+
 async function getOrders(req, res, next) {
     try {
         const orders = await Order.findAllForUser(res.locals.uid);
@@ -26,11 +30,13 @@ async function addOrder(req, res, next) {
 
     try {
         await order.save();
+
+        await notifyAdminAboutNewOrder(global.telegramBot.bot, adminChatId, order);
     } catch (error) {
         return next(error);
     };
 
-    req.session.cart = null;
+    // req.session.cart = null;
     res.redirect("/orders");
 }
 

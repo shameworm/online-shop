@@ -1,6 +1,6 @@
 function getOrderMessage(order) {
   if (!order) {
-    return
+    return;
   }
 
   const itemsList = order.productData.items
@@ -13,11 +13,20 @@ function getOrderMessage(order) {
     )
     .join("\n\n");
 
+  const formattedDate = order.date instanceof Date && !isNaN(order.date)
+    ? order.date.toLocaleDateString("en-US", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    })
+    : "";
+
   return `
 
-           🛒 ORDER SUMMARY
+   ${order.id ? `🛒 ORDER SUMMARY` : "NEW ORDER RECEIVED"}
+🔖 ${order.id ? `Order ID: ${order.id}` : ""}
 
-🔖 Order ID: ${order.id || order._id}
 
 📍 Delivery Details:
    - Receiver: ${order.userData.fullname}
@@ -27,22 +36,18 @@ function getOrderMessage(order) {
    ${order.ttn ? `- TTN: ${order.ttn}` : ""}
 📦 Order Status: ${order.status}
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 🛍️ Items Ordered:
 ${itemsList}
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 💵 Total Amount: $${order.productData.totalPrice.toFixed(2)}
-
-📅 Order Date: ${order.date.toLocaleDateString("en-US", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  })}
+    
+${formattedDate && `📅 Order Date: ${formattedDate}`}
 `;
 }
+
 
 module.exports = { getOrderMessage };

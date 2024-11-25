@@ -70,11 +70,16 @@ class Order {
     }
 
     static async findByStatus(status) {
-        return db
+        const orders = await db
             .getDatabase()
             .collection("orders")
-            .find({ status }).sort({ _id: -1 }).toArray();
+            .find({ status })
+            .sort({ _id: -1 })
+            .toArray();
+
+        return this.transformOrderDocuments(orders);
     }
+
 
     save() {
         if (this.id) {

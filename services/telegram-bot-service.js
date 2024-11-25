@@ -19,9 +19,10 @@ class TelegramBotService {
                     await TelegramController.sendProcessingOrders(this.bot, chatId);
                 } else if (data === "/all" && chatId.toString() === adminChatId) {
                     await TelegramController.sendAllOrders(this.bot, chatId);
+                } else if (data === "/order") {
+                    await TelegramController.handleFindOrderById(this.bot, chatId);
                 } else if (data.startsWith("/navigate_prev")) {
                     const currentIndex = parseInt(data.split("_")[2], 10);
-                    console.log(currentIndex)
                     await TelegramController.sendProcessingOrders(this.bot, chatId, messageId, currentIndex - 1);
                 } else if (data.startsWith("/navigate_next")) {
                     const currentIndex = parseInt(data.split("_")[2], 10);
@@ -37,8 +38,6 @@ class TelegramBotService {
                     await TelegramController.sendAdminMenu(this.bot, chatId);
                 } else if (data.startsWith("/update")) {
                     const [, orderId, newStatus] = data.split("_");
-                    console.log(data);
-                    console.log(orderId, newStatus)
                     await TelegramController.changeOrderStatus(this.bot, chatId, orderId, newStatus);
                 } else if (data.startsWith("/add_ttn_")) {
                     const orderId = data.split("_")[2];
@@ -57,18 +56,41 @@ class TelegramBotService {
 
         this.bot.onText(/\/start/, async (msg) => {
             const chatId = msg.chat.id;
+            const keyboard = [
+                [
+                    {
+                        text: "Menu",
+                    },
+                ],
+            ];
+            const options = {
+                reply_markup: {
+                    keyboard: keyboard,
+                    resize_keyboard: true,
+                    one_time_keyboard: false,
+                },
+            };
+
             if (chatId.toString() === adminChatId) {
-                await TelegramController.sendAdminMenu(this.bot, chatId);
+                await TelegramController.sendAdminMenu(this.bot, chatId, options);
             } else {
-                await TelegramController.sendUserMenu(this.bot, chatId);
+                await TelegramController.sendUserMenu(this.bot, chatId, options);
             }
         });
+
+
 
         this.bot.onText(/\/processing/, async (msg) => {
             const chatId = msg.chat.id;
             if (chatId.toString() === adminChatId) {
                 await TelegramController.sendProcessingOrders(this.bot, chatId);
             }
+        });
+
+        this.bot.onText(/\/order (\d+)/, async (msg, match) => {
+            const chatId = msg.chat.id;
+            const orderId = match[1];
+            await TelegramController.sendOrderById(this.bot, chatId, orderId);
         });
 
         this.bot.onText(/\/all/, async (msg) => {

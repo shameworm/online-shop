@@ -1,5 +1,6 @@
 const Order = require("../models/order-model");
 const User = require("../models/user-model");
+const { generateInlineKeyboard } = require('../util/order-inline-keyboard');
 const OrderMessage = require("../util/orders-message");
 
 const sendAdminMenu = async (bot, chatId) => {
@@ -7,6 +8,7 @@ const sendAdminMenu = async (bot, chatId) => {
     inline_keyboard: [
       [{ text: "Processing Orders", callback_data: "/processing" }],
       [{ text: "All Orders", callback_data: "/all" }],
+      [{ text: "Find By Id", callback_data: "/order" }],
     ],
     resize_keyboard: true,
   };
@@ -21,6 +23,16 @@ const sendUserMenu = async (bot, chatId) => {
   await bot.sendMessage(chatId, "User Menu:", { reply_markup: keyboard });
 };
 
+const notifyAdminAboutNewOrder = async (bot, chatId, order) => {
+  try {
+    console.log(order)
+    const message = OrderMessage.getOrderMessage(order);
+    await bot.sendMessage(chatId, message);
+  } catch (error) {
+    console.error("Error fetching processing orders:", error);
+  }
+}
+
 const sendProcessingOrders = async (bot, chatId, messageId, currentIndex = 0) => {
   try {
     const processingOrders = await Order.findByStatus("processing");
@@ -32,37 +44,8 @@ const sendProcessingOrders = async (bot, chatId, messageId, currentIndex = 0) =>
 
     const order = processingOrders[currentIndex];
     const message = OrderMessage.getOrderMessage(order);
-    console.log(order)
 
-    const inlineKeyboard = {
-      inline_keyboard: [
-        [{ text: "Go back", callback_data: `/navigate_exit` }],
-        [
-          { text: "Processing", callback_data: `/update_${order._id}_processing` },
-          { text: "Packed", callback_data: `/update_${order._id}_packed` },
-          { text: "Shipped to Courier", callback_data: `/update_${order._id}_shipped_to_courier` },
-        ],
-        [
-          { text: "In Transit", callback_data: `/update_${order._id}_in_transit` },
-          { text: "Arrived", callback_data: `/update_${order._id}_arrived` },
-          { text: "Completed", callback_data: `/update_${order._id}_completed` },
-        ],
-        [{ text: "Rejected", callback_data: `/update_${order._id}_rejected` }],
-        [{ text: "Add TTN", callback_data: `/add_ttn_${order._id}` }],
-        [
-          {
-            text: "⬅️",
-            callback_data: `/navigate_prev_${currentIndex}`,
-            disabled: currentIndex === 0,
-          },
-          {
-            text: "➡️",
-            callback_data: `/navigate_next_${currentIndex}`,
-            disabled: currentIndex === processingOrders.length - 1,
-          },
-        ],
-      ],
-    };
+    const inlineKeyboard = generateInlineKeyboard(order, currentIndex, processingOrders);
 
     if (messageId) {
       await bot.editMessageText(message, {
@@ -78,13 +61,55 @@ const sendProcessingOrders = async (bot, chatId, messageId, currentIndex = 0) =>
     }
   } catch (error) {
     console.error("Error fetching processing orders:", error);
-    await bot.sendMessage(chatId, "Error fetching orders.");
   }
+};
+
+const sendOrderById = async (bot, chatId, orderId) => {
+  try {
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      await bot.sendMessage(chatId, `Order with this id not found.`);
+      return;
+    }
+
+    const message = OrderMessage.getOrderMessage(order);
+
+    const inlineKeyboard = generateInlineKeyboard(order, 0, order, "none");
+
+
+    await bot.sendMessage(chatId, message, {
+      reply_markup: inlineKeyboard
+    });
+  } catch (error) {
+    console.error(`Failed to fetch order`, error);
+  }
+};
+
+const handleFindOrderById = async (bot, chatId) => {
+  await bot.sendMessage(chatId, "Please enter the Order ID:");
+
+  bot.once("message", async (msgWithOrderId) => {
+    const orderId = msgWithOrderId.text;
+
+    if (!orderId) {
+      await bot.sendMessage(chatId, "Invalid Order ID. Please try again.");
+      return;
+    }
+
+    try {
+      await sendOrderById(bot, chatId, orderId);
+    } catch (error) {
+      console.error("Error finding order by ID:", error);
+      await bot.sendMessage(chatId, "An error occurred while finding the order. Please try again.");
+    }
+  });
 };
 
 const sendAllOrders = async (bot, chatId, messageId, currentIndex = 0) => {
   try {
     const orders = await Order.findAll();
+
     if (!orders || orders.length === 0) {
       await bot.sendMessage(chatId, "No orders found.");
       return;
@@ -92,36 +117,8 @@ const sendAllOrders = async (bot, chatId, messageId, currentIndex = 0) => {
 
     const order = orders[currentIndex];
     const message = OrderMessage.getOrderMessage(order);
-    console.log(order)
 
-    const inlineKeyboard = {
-      inline_keyboard: [
-        [{ text: "Go back", callback_data: `/navigate_exit` }],
-        [
-          { text: "Processing", callback_data: `/update_${order.id}_processing` },
-          { text: "Packed", callback_data: `/update_${order.id}_packed` },
-          { text: "Shipped to Courier", callback_data: `/update_${order.id}_shipped_to_courier` },
-        ],
-        [
-          { text: "In Transit", callback_data: `/update_${order.id}_in_transit` },
-          { text: "Arrived", callback_data: `/update_${order.id}_arrived` },
-          { text: "Completed", callback_data: `/update_${order.id}_completed` },
-        ],
-        [{ text: "Rejected", callback_data: `/update_${order.id}_rejected` }],
-        [
-          {
-            text: "⬅️",
-            callback_data: `/navigate_all_prev_${currentIndex}`,
-            disabled: currentIndex === 0,
-          },
-          {
-            text: "➡️",
-            callback_data: `/navigate_all_next_${currentIndex}`,
-            disabled: currentIndex === orders.length - 1,
-          },
-        ],
-      ],
-    };
+    const inlineKeyboard = generateInlineKeyboard(order, currentIndex, orders, 'all');
 
     if (messageId) {
       await bot.editMessageText(message, {
@@ -137,9 +134,9 @@ const sendAllOrders = async (bot, chatId, messageId, currentIndex = 0) => {
     }
   } catch (error) {
     console.error("Error fetching all orders:", error);
-    await bot.sendMessage(chatId, "Error fetching orders.");
   }
 };
+
 
 const handleUserRegistration = async (bot, msg, chatId) => {
   const keyboard = {
@@ -191,6 +188,7 @@ const handleUserRegistration = async (bot, msg, chatId) => {
 const changeOrderStatus = async (bot, chatId, orderId, newStatus) => {
   try {
     const order = await Order.findById(orderId);
+    console.log(order)
 
     if (!order) {
       await bot.sendMessage(chatId, `Order #${orderId} not found.`);
@@ -247,8 +245,11 @@ module.exports = {
   sendAdminMenu,
   sendUserMenu,
   sendProcessingOrders,
+  sendOrderById,
   sendAllOrders,
+  handleFindOrderById,
   handleUserRegistration,
   changeOrderStatus,
   handleAddTrackingNumber,
+  notifyAdminAboutNewOrder
 };
