@@ -1,7 +1,7 @@
 const Order = require("../models/order-model");
 const User = require("../models/user-model");
 
-const { notifyAdminAboutNewOrder } = require("../controllers/telegram-controller")
+const { notifyAdminAboutNewOrder, notifyUserAboutNewOrder } = require("../controllers/telegram/notification")
 
 
 async function getOrders(req, res, next) {
@@ -36,6 +36,10 @@ async function addOrder(req, res, next) {
             if (admin.telegramId) {
                 await notifyAdminAboutNewOrder(global.telegramBot.bot, admin.telegramId, order);
             }
+        }
+
+        if (order.userData.telegramId) {
+            await notifyUserAboutNewOrder(global.telegramBot.bot, order.userData.telegramId, order);
         }
     } catch (error) {
         return next(error);

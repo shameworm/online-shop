@@ -1,6 +1,9 @@
 const TelegramBot = require("node-telegram-bot-api");
-const { botToken, adminChatId } = require("../config/telegram");
-const TelegramController = require("../controllers/telegram-controller");
+const { botToken } = require("../config/telegram");
+const { handleStartCommand } = require("../controllers/telegram-controller");
+const { sendProcessingOrders, sendAllOrders, sendUserOrders, sendUserActiveOrders, changeOrderStatus, handleAddTrackingNumber, handleFindOrderByIdForUser } = require("../controllers/telegram/order");
+const { handleUserRegistration } = require("../controllers/telegram/auth");
+const { sendAdminMenu, sendUserMenu } = require("../controllers/telegram/menu");
 
 class TelegramBotService {
     constructor() {
@@ -16,52 +19,51 @@ class TelegramBotService {
 
             try {
                 if (data === "/register") {
-                    await TelegramController.handleUserRegistration(this.bot, query.message, chatId)
-                } else if (data === "/processing" && chatId.toString() === adminChatId) {
-                    await TelegramController.sendProcessingOrders(this.bot, chatId);
-                } else if (data === "/all" && chatId.toString() === adminChatId) {
-                    await TelegramController.sendAllOrders(this.bot, chatId);
+                    await handleUserRegistration(this.bot, query.message, chatId)
+                } else if (data === "/processing") {
+                    await sendProcessingOrders(this.bot, chatId);
+                } else if (data === "/all") {
+                    await sendAllOrders(this.bot, chatId);
                 } else if (data === "/order") {
-                    await TelegramController.handleFindOrderByIdForUser(this.bot, chatId);
+                    await handleFindOrderByIdForUser(this.bot, chatId);
                 } else if (data.startsWith("/navigate_processing_prev")) {
                     const currentIndex = parseInt(data.split("_")[3], 10);
-                    await TelegramController.sendProcessingOrders(this.bot, chatId, messageId, currentIndex - 1);
+                    await sendProcessingOrders(this.bot, chatId, messageId, currentIndex - 1);
                 } else if (data.startsWith("/navigate_processing_next")) {
                     const currentIndex = parseInt(data.split("_")[3], 10);
-                    await TelegramController.sendProcessingOrders(this.bot, chatId, messageId, currentIndex + 1);
+                    await sendProcessingOrders(this.bot, chatId, messageId, currentIndex + 1);
                 } else if (data.startsWith("/navigate_all_prev")) {
                     const currentIndex = parseInt(data.split("_")[3], 10);
-                    await TelegramController.sendAllOrders(this.bot, chatId, messageId, currentIndex - 1);
+                    await sendAllOrders(this.bot, chatId, messageId, currentIndex - 1);
                 } else if (data.startsWith("/navigate_all_next")) {
                     const currentIndex = parseInt(data.split("_")[3], 10);
-                    await TelegramController.sendAllOrders(this.bot, chatId, messageId, currentIndex + 1);
+                    await sendAllOrders(this.bot, chatId, messageId, currentIndex + 1);
                 } else if (data === "/navigate_exit") {
-                    await TelegramController.sendAdminMenu(this.bot, chatId);
+                    await sendAdminMenu(this.bot, chatId);
                 } else if (data === "/navigate_user_exit") {
-                    await TelegramController.sendUserMenu(this.bot, chatId);
+                    await sendUserMenu(this.bot, chatId);
                 } else if (data.startsWith("/update")) {
                     const [, orderId, newStatus] = data.split("_");
-                    await TelegramController.changeOrderStatus(this.bot, chatId, orderId, newStatus);
+                    await changeOrderStatus(this.bot, chatId, orderId, newStatus);
                 } else if (data.startsWith("/add_ttn_")) {
                     const orderId = data.split("_")[2];
-                    await TelegramController.handleAddTrackingNumber(this.bot, query.message, chatId, orderId);
-                }
-                else if (data === "/my_orders_all") {
-                    await TelegramController.sendUserOrders(this.bot, chatId);
+                    await handleAddTrackingNumber(this.bot, query.message, chatId, orderId);
+                } else if (data === "/my_orders_all") {
+                    await sendUserOrders(this.bot, chatId);
                 } else if (data === "/orders_active") {
-                    await TelegramController.sendUserActiveOrders(this.bot, chatId);
+                    await sendUserActiveOrders(this.bot, chatId);
                 } else if (data.startsWith("/navigate_user_prev")) {
                     const currentIndex = parseInt(data.split("_")[3], 10);
-                    await TelegramController.sendUserOrders(this.bot, chatId, messageId, currentIndex - 1);
+                    await sendUserOrders(this.bot, chatId, messageId, currentIndex - 1);
                 } else if (data.startsWith("/navigate_user_next")) {
                     const currentIndex = parseInt(data.split("_")[3], 10);
-                    await TelegramController.sendUserOrders(this.bot, chatId, messageId, currentIndex + 1);
+                    await sendUserOrders(this.bot, chatId, messageId, currentIndex + 1);
                 } else if (data.startsWith("/navigate_user_active_prev")) {
                     const currentIndex = parseInt(data.split("_")[4], 10);
-                    await TelegramController.sendUserActiveOrders(this.bot, chatId, messageId, currentIndex - 1);
+                    await sendUserActiveOrders(this.bot, chatId, messageId, currentIndex - 1);
                 } else if (data.startsWith("/navigate_user_active_next")) {
                     const currentIndex = parseInt(data.split("_")[4], 10);
-                    await TelegramController.sendUserActiveOrders(this.bot, chatId, messageId, currentIndex + 1);
+                    await sendUserActiveOrders(this.bot, chatId, messageId, currentIndex + 1);
                 }
                 await this.bot.answerCallbackQuery(query.id);
             } catch (error) {
@@ -71,7 +73,7 @@ class TelegramBotService {
 
         this.bot.onText(/\/start/, async (msg) => {
             const chatId = msg.chat.id;
-            await TelegramController.handleStartCommand(this.bot, chatId);
+            await handleStartCommand(this.bot, chatId);
         });
     }
 }

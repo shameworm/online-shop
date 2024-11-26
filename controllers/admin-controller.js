@@ -2,6 +2,7 @@ const Product = require("../models/product-model");
 const Order = require("../models/order-model");
 const validation = require("../util/validation");
 const sessionFlash = require("../util/session-flashing");
+const { notifyUserAboutOrderStatusChange } = require("./telegram/notification");
 
 async function getProducts(req, res, next) {
     try {
@@ -146,14 +147,17 @@ async function getOrders(req, res, next) {
 async function updateOrder(req, res, next) {
     const orderId = req.params.id;
     const newStatus = req.body.newStatus;
-    
+
     try {
         const order = await Order.findById(orderId);
 
         order.status = newStatus;
 
         await order.save();
+        if (order.userData.telegramId) {
+            await notifyUserAboutOrderStatusChange(global.telegramBot.bot, orderId, newStatus);
 
+        }
         res.json({
             message: "Order updated successfully",
             newStatus: newStatus,
