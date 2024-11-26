@@ -2,9 +2,10 @@ const Order = require("../../models/order-model");
 const User = require("../../models/user-model");
 
 const { getOrderMessage } = require('../../util/orders-message')
-const { generateInlineKeyboard } = require('../../util/order-inline-keyboard')
 
+const { generateInlineKeyboard } = require('../../util/order-inline-keyboard')
 const { notifyUserAboutOrderStatusChange, notifyUserAboutTTN } = require('./notification')
+
 
 const sendProcessingOrders = async (bot, chatId, messageId, currentIndex = 0) => {
   try {
