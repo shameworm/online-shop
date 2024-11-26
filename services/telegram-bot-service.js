@@ -22,7 +22,7 @@ class TelegramBotService {
                 } else if (data === "/all" && chatId.toString() === adminChatId) {
                     await TelegramController.sendAllOrders(this.bot, chatId);
                 } else if (data === "/order") {
-                    await TelegramController.handleFindOrderById(this.bot, chatId);
+                    await TelegramController.handleFindOrderByIdForUser(this.bot, chatId);
                 } else if (data.startsWith("/navigate_processing_prev")) {
                     const currentIndex = parseInt(data.split("_")[3], 10);
                     await TelegramController.sendProcessingOrders(this.bot, chatId, messageId, currentIndex - 1);
@@ -72,25 +72,6 @@ class TelegramBotService {
         this.bot.onText(/\/start/, async (msg) => {
             const chatId = msg.chat.id;
             await TelegramController.handleStartCommand(this.bot, chatId);
-        });
-
-
-        this.bot.onText(/\/processing/, async (msg) => {
-            const chatId = msg.chat.id;
-            if (chatId.toString() === adminChatId) {
-                await TelegramController.sendProcessingOrders(this.bot, chatId);
-            }
-        });
-
-        this.bot.onText(/\/order (\d+)/, async (msg, match) => {
-            const chatId = msg.chat.id;
-            const orderId = match[1];
-            await TelegramController.sendOrderById(this.bot, chatId, orderId);
-        });
-
-        this.bot.onText(/\/all/, async (msg) => {
-            const chatId = msg.chat.id;
-            await TelegramController.sendAllOrders(this.bot, chatId);
         });
     }
 }

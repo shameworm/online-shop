@@ -32,10 +32,6 @@ const generateInlineKeyboard = (order, currentIndex, orders, prefix = 'processin
 
 
   if (prefix !== 'none' && orders.length > 1) {
-    console.log('prefix:', prefix);
-    console.log('orders.length:', orders.length);
-    console.log('currentIndex:', currentIndex);
-
     const navigationButtons = [];
 
     if (currentIndex > 0) {
@@ -57,7 +53,6 @@ const generateInlineKeyboard = (order, currentIndex, orders, prefix = 'processin
     }
   }
 
-  console.log(inlineKeyboard.inline_keyboard)
 
   return inlineKeyboard;
 };

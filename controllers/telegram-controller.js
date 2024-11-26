@@ -92,7 +92,6 @@ const handleUserRegistration = async (bot, msg, chatId) => {
 
   bot.once("contact", async (msgWithContact) => {
     const contact = msgWithContact.contact;
-    console.log(msgWithContact)
     if (!contact || !contact.phone_number) {
       await bot.sendMessage(chatId, "Invalid contact. Try again.");
       return;
@@ -149,7 +148,6 @@ const sendUserMenu = async (bot, chatId) => {
 
 const notifyAdminAboutNewOrder = async (bot, chatId, order) => {
   try {
-    console.log(order)
     const message = OrderMessage.getOrderMessage(order);
     await bot.sendMessage(chatId, message);
   } catch (error) {
@@ -264,7 +262,6 @@ const sendAllOrders = async (bot, chatId, messageId, currentIndex = 0) => {
 const changeOrderStatus = async (bot, chatId, orderId, newStatus) => {
   try {
     const order = await Order.findById(orderId);
-    console.log(order)
 
     if (!order) {
       await bot.sendMessage(chatId, `Order #${orderId} not found.`);
@@ -390,21 +387,26 @@ const handleFindOrderByIdForUser = async (bot, chatId) => {
 
     try {
       const user = await User.findByChatId(chatId);
-      const order = user.isAdmin
-        ? await Order.findById(orderId)
-        : await Order.findByIdForUser(orderId, user._id);
 
-      if (!order) {
-        await bot.sendMessage(chatId, "Order not found or you don't have access to it.");
-        return;
+      if (user.isAdmin) {
+        const order = await Order.findById(orderId);
+        if (!order) {
+          await bot.sendMessage(chatId, "Order not found.");
+          return;
+        }
+        const message = OrderMessage.getOrderMessage(order);
+        const inlineKeyboard = generateInlineKeyboard(order, 0, [order], "none");
+        await bot.sendMessage(chatId, message, { reply_markup: inlineKeyboard });
+      } else {
+        const order = await Order.findByIdForUser(orderId, user._id);
+        if (!order) {
+          await bot.sendMessage(chatId, "Order not found or you don't have access to it.");
+          return;
+        }
+        const message = OrderMessage.getOrderMessage(order);
+        const inlineKeyboard = generateInlineKeyboard(order, 0, [order], "none", false);
+        await bot.sendMessage(chatId, message, { reply_markup: inlineKeyboard });
       }
-
-      const message = OrderMessage.getOrderMessage(order);
-      const inlineKeyboard = generateInlineKeyboard(order, 0, [order], "none");
-
-      await bot.sendMessage(chatId, message, {
-        reply_markup: inlineKeyboard
-      });
     } catch (error) {
       console.error("Error finding order by ID:", error);
       await bot.sendMessage(chatId, "An error occurred while finding the order. Please try again.");
