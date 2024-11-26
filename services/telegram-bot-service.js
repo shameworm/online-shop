@@ -15,7 +15,9 @@ class TelegramBotService {
             const data = query.data;
 
             try {
-                if (data === "/processing" && chatId.toString() === adminChatId) {
+                if (data === "/register") {
+                    await TelegramController.handleUserRegistration(this.bot, query.message, chatId)
+                } else if (data === "/processing" && chatId.toString() === adminChatId) {
                     await TelegramController.sendProcessingOrders(this.bot, chatId);
                 } else if (data === "/all" && chatId.toString() === adminChatId) {
                     await TelegramController.sendAllOrders(this.bot, chatId);
@@ -49,35 +51,10 @@ class TelegramBotService {
             }
         });
 
-        this.bot.onText(/\/register/, async (msg) => {
-            const chatId = msg.chat.id;
-            await TelegramController.handleUserRegistration(this.bot, msg, chatId);
-        });
-
         this.bot.onText(/\/start/, async (msg) => {
             const chatId = msg.chat.id;
-            const keyboard = [
-                [
-                    {
-                        text: "Menu",
-                    },
-                ],
-            ];
-            const options = {
-                reply_markup: {
-                    keyboard: keyboard,
-                    resize_keyboard: true,
-                    one_time_keyboard: false,
-                },
-            };
-
-            if (chatId.toString() === adminChatId) {
-                await TelegramController.sendAdminMenu(this.bot, chatId, options);
-            } else {
-                await TelegramController.sendUserMenu(this.bot, chatId, options);
-            }
+            await TelegramController.handleStartCommand(this.bot, chatId);
         });
-
 
 
         this.bot.onText(/\/processing/, async (msg) => {

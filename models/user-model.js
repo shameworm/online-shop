@@ -22,6 +22,21 @@ class User {
             .findOne({ _id: uid }, { projection: { password: 0 } });
     }
 
+    static findByChatId(chatId) {
+        return db
+            .getDatabase()
+            .collection("users")
+            .findOne({ telegramId: chatId });
+    }
+
+    static findAllAdmins() {
+        return db
+            .getDatabase()
+            .collection("users")
+            .find({ isAdmin: true })
+            .toArray();
+    }
+
     static setChatIdByPhoneNumber(phoneNumber, chatId) {
         return db
             .getDatabase()
