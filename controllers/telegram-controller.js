@@ -186,48 +186,6 @@ const sendProcessingOrders = async (bot, chatId, messageId, currentIndex = 0) =>
   }
 };
 
-const sendOrderById = async (bot, chatId, orderId) => {
-  try {
-    const order = await Order.findById(orderId);
-
-    if (!order) {
-      await bot.sendMessage(chatId, `Order with this id not found.`);
-      return;
-    }
-
-    const message = OrderMessage.getOrderMessage(order);
-
-    const inlineKeyboard = generateInlineKeyboard(order, 0, order, "none",);
-
-
-    await bot.sendMessage(chatId, message, {
-      reply_markup: inlineKeyboard
-    });
-  } catch (error) {
-    console.error(`Failed to fetch order`, error);
-  }
-};
-
-const handleFindOrderById = async (bot, chatId) => {
-  await bot.sendMessage(chatId, "Please enter the Order ID:");
-
-  bot.once("message", async (msgWithOrderId) => {
-    const orderId = msgWithOrderId.text;
-
-    if (!orderId) {
-      await bot.sendMessage(chatId, "Invalid Order ID. Please try again.");
-      return;
-    }
-
-    try {
-      await sendOrderById(bot, chatId, orderId);
-    } catch (error) {
-      console.error("Error finding order by ID:", error);
-      await bot.sendMessage(chatId, "An error occurred while finding the order. Please try again.");
-    }
-  });
-};
-
 const sendAllOrders = async (bot, chatId, messageId, currentIndex = 0) => {
   try {
     const orders = await Order.findAll();
@@ -272,7 +230,9 @@ const changeOrderStatus = async (bot, chatId, orderId, newStatus) => {
     await order.save();
 
     await bot.sendMessage(chatId, `Order #${orderId} status updated to ${newStatus}.`);
-
+    if (order.userData.telegramId) {
+      await notifyUserAboutOrderStatusChange(bot, orderId, newStatus);
+    }
   } catch (error) {
     console.error("Error updating order status:", error);
     await bot.sendMessage(chatId, `Failed to update order #${orderId} status.`);
@@ -304,6 +264,9 @@ const handleAddTrackingNumber = async (bot, msg, chatId, orderId) => {
       await order.save();
 
       await bot.sendMessage(chatId, `Tracking number for Order #${orderId} has been added: ${ttn}`);
+      if (order.userData.telegramId) {
+        await notifyUserAboutTTN(bot, orderId, ttn)
+      }
       await bot.sendAdminMenu();
     } catch (error) {
       console.error("Error adding tracking number:", error);
@@ -414,14 +377,45 @@ const handleFindOrderByIdForUser = async (bot, chatId) => {
   });
 };
 
+const notifyUserAboutOrderStatusChange = async (bot, orderId, newStatus) => {
+  try {
+    const order = await Order.findById(orderId);
+    if (!order) {
+      console.error(`Order #${orderId} not found.`);
+      return;
+    }
+    const message = `Your order #${orderId} status has been updated to: ${newStatus}.`;
+    await bot.sendMessage(order.userData?.telegramId, message);
+
+  } catch (error) {
+    console.error("Error sending notification about order status change:", error);
+  }
+};
+
+
+const notifyUserAboutTTN = async (bot, orderId, ttn) => {
+  try {
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      console.error(`Order #${orderId} not found.`);
+      return;
+    }
+
+    const message = `A tracking number (TTN) has been added to your order #${orderId}: ${ttn}.`;
+    await bot.sendMessage(order.userData.telegramId, message);
+  } catch (error) {
+    console.error("Error sending notification about TTN addition:", error);
+  }
+};
+
+
 
 module.exports = {
   sendAdminMenu,
   sendUserMenu,
   sendProcessingOrders,
-  sendOrderById,
   sendAllOrders,
-  handleFindOrderById,
   handleUserRegistration,
   changeOrderStatus,
   handleAddTrackingNumber,
@@ -431,4 +425,6 @@ module.exports = {
   sendUserOrders,
   sendUserActiveOrders,
   handleFindOrderByIdForUser,
+  notifyUserAboutOrderStatusChange,
+  notifyUserAboutTTN,
 };
