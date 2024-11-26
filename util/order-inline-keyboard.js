@@ -1,7 +1,20 @@
-const generateInlineKeyboard = (order, currentIndex, orders, prefix = 'processing') => {
-  const inlineKeyboard = {
-    inline_keyboard: [
-      [{ text: "Go back", callback_data: `/navigate_exit` }],
+const generateInlineKeyboard = (order, currentIndex, orders, prefix = 'processing', isAdmin = true) => {
+  let inlineKeyboard = {
+    inline_keyboard: []
+  };
+
+  if (isAdmin) {
+    inlineKeyboard.inline_keyboard.push([
+      { text: "Go back", callback_data: "/navigate_exit" }
+    ]);
+  } else {
+    inlineKeyboard.inline_keyboard.push([
+      { text: "Back to Menu", callback_data: "/navigate_user_exit" }
+    ]);
+  }
+
+  if (isAdmin) {
+    inlineKeyboard.inline_keyboard.push(
       [
         { text: "Processing", callback_data: `/update_${order.id}_processing` },
         { text: "Packed", callback_data: `/update_${order.id}_packed` },
@@ -13,24 +26,38 @@ const generateInlineKeyboard = (order, currentIndex, orders, prefix = 'processin
         { text: "Completed", callback_data: `/update_${order.id}_completed` },
       ],
       [{ text: "Rejected", callback_data: `/update_${order.id}_rejected` }],
-      [{ text: "Add TTN", callback_data: `/add_ttn_${order.id}` }],
-    ],
-  };
-
-  if (prefix !== 'none') {
-    inlineKeyboard.inline_keyboard.push([
-      {
-        text: "⬅️",
-        callback_data: `/navigate_${prefix}_prev_${currentIndex}`,
-        disabled: currentIndex === 0,
-      },
-      {
-        text: "➡️",
-        callback_data: `/navigate_${prefix}_next_${currentIndex}`,
-        disabled: currentIndex === orders.length - 1,
-      },
-    ]);
+      [{ text: "Add TTN", callback_data: `/add_ttn_${order.id}` }]
+    );
   }
+
+
+  if (prefix !== 'none' && orders.length > 1) {
+    console.log('prefix:', prefix);
+    console.log('orders.length:', orders.length);
+    console.log('currentIndex:', currentIndex);
+
+    const navigationButtons = [];
+
+    if (currentIndex > 0) {
+      navigationButtons.push({
+        text: "⬅️ Previous",
+        callback_data: `/navigate_${prefix}_prev_${currentIndex}`
+      });
+    }
+
+    if (currentIndex < orders.length - 1) {
+      navigationButtons.push({
+        text: "Next ➡️",
+        callback_data: `/navigate_${prefix}_next_${currentIndex}`
+      });
+    }
+
+    if (navigationButtons.length > 0) {
+      inlineKeyboard.inline_keyboard.push(navigationButtons);
+    }
+  }
+
+  console.log(inlineKeyboard.inline_keyboard)
 
   return inlineKeyboard;
 };

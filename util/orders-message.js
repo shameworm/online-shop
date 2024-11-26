@@ -25,7 +25,7 @@ function getOrderMessage(order) {
   return `
 
    ${order.id ? `🛒 ORDER SUMMARY` : "NEW ORDER RECEIVED"}
-🔖 ${order.id ? `Order ID: ${order.id}` : ""}
+   ${order.id ? `🔖 Order ID: ${order.id}` : ""}
 
 
 📍 Delivery Details:

@@ -92,9 +92,7 @@ const handleUserRegistration = async (bot, msg, chatId) => {
 
   bot.once("contact", async (msgWithContact) => {
     const contact = msgWithContact.contact;
-
-
-
+    console.log(msgWithContact)
     if (!contact || !contact.phone_number) {
       await bot.sendMessage(chatId, "Invalid contact. Try again.");
       return;
@@ -140,8 +138,11 @@ const sendAdminMenu = async (bot, chatId) => {
 
 const sendUserMenu = async (bot, chatId) => {
   const keyboard = {
-    keyboard: [["/orders - My Orders"], ["/status - Check Order Status"]],
-    resize_keyboard: true,
+    inline_keyboard: [
+      [{ text: "My Orders", callback_data: "/my_orders_all" }],
+      [{ text: "My Active Orders", callback_data: "/orders_active" }],
+      [{ text: "Find By Id", callback_data: "/order" }],
+    ],
   };
   await bot.sendMessage(chatId, "User Menu:", { reply_markup: keyboard });
 };
@@ -198,7 +199,7 @@ const sendOrderById = async (bot, chatId, orderId) => {
 
     const message = OrderMessage.getOrderMessage(order);
 
-    const inlineKeyboard = generateInlineKeyboard(order, 0, order, "none");
+    const inlineKeyboard = generateInlineKeyboard(order, 0, order, "none",);
 
 
     await bot.sendMessage(chatId, message, {
@@ -282,8 +283,6 @@ const changeOrderStatus = async (bot, chatId, orderId, newStatus) => {
 };
 
 
-
-
 const handleAddTrackingNumber = async (bot, msg, chatId, orderId) => {
   await bot.sendMessage(chatId, `Please enter the tracking number for Order #${orderId}:`);
 
@@ -308,9 +307,107 @@ const handleAddTrackingNumber = async (bot, msg, chatId, orderId) => {
       await order.save();
 
       await bot.sendMessage(chatId, `Tracking number for Order #${orderId} has been added: ${ttn}`);
+      await bot.sendAdminMenu();
     } catch (error) {
       console.error("Error adding tracking number:", error);
       await bot.sendMessage(chatId, "Error adding tracking number.");
+    }
+  });
+};
+
+const sendUserOrders = async (bot, chatId, messageId, currentIndex = 0) => {
+  try {
+    const user = await User.findByChatId(chatId);
+    const orders = await Order.findAllForUser(user._id);
+
+    if (!orders || orders.length === 0) {
+      await bot.sendMessage(chatId, "You don't have any orders yet.");
+      return;
+    }
+
+    const order = orders[currentIndex];
+    const message = OrderMessage.getOrderMessage(order);
+    const inlineKeyboard = generateInlineKeyboard(order, currentIndex, orders, 'user', false);
+
+    if (messageId) {
+      await bot.editMessageText(message, {
+        chat_id: chatId,
+        message_id: messageId,
+        reply_markup: inlineKeyboard,
+      });
+    } else {
+      const sentMessage = await bot.sendMessage(chatId, message, {
+        reply_markup: inlineKeyboard,
+      });
+      messageId = sentMessage.message_id;
+    }
+  } catch (error) {
+    console.error("Error fetching user orders:", error);
+  }
+};
+
+const sendUserActiveOrders = async (bot, chatId, messageId, currentIndex = 0) => {
+  try {
+    const user = await User.findByChatId(chatId);
+    const orders = await Order.findActiveForUser(user._id);
+
+    if (!orders || orders.length === 0) {
+      await bot.sendMessage(chatId, "You don't have any active orders.");
+      return;
+    }
+
+    const order = orders[currentIndex];
+    const message = OrderMessage.getOrderMessage(order);
+    const inlineKeyboard = generateInlineKeyboard(order, currentIndex, orders, 'user_active', false);
+
+    if (messageId) {
+      await bot.editMessageText(message, {
+        chat_id: chatId,
+        message_id: messageId,
+        reply_markup: inlineKeyboard,
+      });
+    } else {
+      const sentMessage = await bot.sendMessage(chatId, message, {
+        reply_markup: inlineKeyboard,
+      });
+      messageId = sentMessage.message_id;
+    }
+  } catch (error) {
+    console.error("Error fetching user active orders:", error);
+  }
+};
+
+const handleFindOrderByIdForUser = async (bot, chatId) => {
+  await bot.sendMessage(chatId, "Please enter the Order ID:");
+
+  bot.once("message", async (msgWithOrderId) => {
+    const orderId = msgWithOrderId.text;
+
+    if (!orderId) {
+      await bot.sendMessage(chatId, "Invalid Order ID. Please try again.");
+      return;
+    }
+
+    try {
+      const user = await User.findByChatId(chatId);
+      const order = user.isAdmin
+        ? await Order.findById(orderId)
+        : await Order.findByIdForUser(orderId, user._id);
+
+      if (!order) {
+        await bot.sendMessage(chatId, "Order not found or you don't have access to it.");
+        return;
+      }
+
+      const message = OrderMessage.getOrderMessage(order);
+      const inlineKeyboard = generateInlineKeyboard(order, 0, [order], "none");
+
+      await bot.sendMessage(chatId, message, {
+        reply_markup: inlineKeyboard
+      });
+    } catch (error) {
+      console.error("Error finding order by ID:", error);
+      await bot.sendMessage(chatId, "An error occurred while finding the order. Please try again.");
     }
   });
 };
@@ -329,4 +426,7 @@ module.exports = {
   notifyAdminAboutNewOrder,
   handleStartCommand,
   checkUserAuth,
+  sendUserOrders,
+  sendUserActiveOrders,
+  handleFindOrderByIdForUser,
 };

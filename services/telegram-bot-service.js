@@ -23,12 +23,11 @@ class TelegramBotService {
                     await TelegramController.sendAllOrders(this.bot, chatId);
                 } else if (data === "/order") {
                     await TelegramController.handleFindOrderById(this.bot, chatId);
-                } else if (data.startsWith("/navigate_prev")) {
-                    const currentIndex = parseInt(data.split("_")[2], 10);
+                } else if (data.startsWith("/navigate_processing_prev")) {
+                    const currentIndex = parseInt(data.split("_")[3], 10);
                     await TelegramController.sendProcessingOrders(this.bot, chatId, messageId, currentIndex - 1);
-                } else if (data.startsWith("/navigate_next")) {
-                    const currentIndex = parseInt(data.split("_")[2], 10);
-                    console.log(currentIndex)
+                } else if (data.startsWith("/navigate_processing_next")) {
+                    const currentIndex = parseInt(data.split("_")[3], 10);
                     await TelegramController.sendProcessingOrders(this.bot, chatId, messageId, currentIndex + 1);
                 } else if (data.startsWith("/navigate_all_prev")) {
                     const currentIndex = parseInt(data.split("_")[3], 10);
@@ -38,12 +37,31 @@ class TelegramBotService {
                     await TelegramController.sendAllOrders(this.bot, chatId, messageId, currentIndex + 1);
                 } else if (data === "/navigate_exit") {
                     await TelegramController.sendAdminMenu(this.bot, chatId);
+                } else if (data === "/navigate_user_exit") {
+                    await TelegramController.sendUserMenu(this.bot, chatId);
                 } else if (data.startsWith("/update")) {
                     const [, orderId, newStatus] = data.split("_");
                     await TelegramController.changeOrderStatus(this.bot, chatId, orderId, newStatus);
                 } else if (data.startsWith("/add_ttn_")) {
                     const orderId = data.split("_")[2];
                     await TelegramController.handleAddTrackingNumber(this.bot, query.message, chatId, orderId);
+                }
+                else if (data === "/my_orders_all") {
+                    await TelegramController.sendUserOrders(this.bot, chatId);
+                } else if (data === "/orders_active") {
+                    await TelegramController.sendUserActiveOrders(this.bot, chatId);
+                } else if (data.startsWith("/navigate_user_prev")) {
+                    const currentIndex = parseInt(data.split("_")[3], 10);
+                    await TelegramController.sendUserOrders(this.bot, chatId, messageId, currentIndex - 1);
+                } else if (data.startsWith("/navigate_user_next")) {
+                    const currentIndex = parseInt(data.split("_")[3], 10);
+                    await TelegramController.sendUserOrders(this.bot, chatId, messageId, currentIndex + 1);
+                } else if (data.startsWith("/navigate_user_active_prev")) {
+                    const currentIndex = parseInt(data.split("_")[4], 10);
+                    await TelegramController.sendUserActiveOrders(this.bot, chatId, messageId, currentIndex - 1);
+                } else if (data.startsWith("/navigate_user_active_next")) {
+                    const currentIndex = parseInt(data.split("_")[4], 10);
+                    await TelegramController.sendUserActiveOrders(this.bot, chatId, messageId, currentIndex + 1);
                 }
                 await this.bot.answerCallbackQuery(query.id);
             } catch (error) {

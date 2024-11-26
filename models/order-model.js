@@ -69,6 +69,33 @@ class Order {
         return this.transformOrderDocument(order);
     }
 
+    static async findActiveForUser(userId) {
+        const uid = new mongodb.ObjectId(userId);
+        const orders = await db
+            .getDatabase()
+            .collection("orders")
+            .find({ 
+                "userData._id": uid,
+                status: { $ne: "completed" }
+            })
+            .sort({ _id: -1 })
+            .toArray();
+    
+        return this.transformOrderDocuments(orders);
+    }
+    
+    static async findByIdForUser(orderId, userId) {
+        const order = await db
+            .getDatabase()
+            .collection("orders")
+            .findOne({ 
+                _id: new mongodb.ObjectId(orderId),
+                "userData._id": new mongodb.ObjectId(userId)
+            });
+    
+        return order ? this.transformOrderDocument(order) : null;
+    }
+
     static async findByStatus(status) {
         const orders = await db
             .getDatabase()
